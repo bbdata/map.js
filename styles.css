@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+/* Normalize */
+
+* {
+  box-sizing: border-box;
+}
+
+/* Structure */
+
+body {
+  font-family: sans-serif;
+  font-size: 16px;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#map {
+  background-color: #000;
+  height: 100%;
+}
+
+#map .pin {
+  background-color: red;
+  cursor: pointer;
+  height: 10px;
+  width: 10px;
+  margin-top: -5px;
+  margin-left: -5px;
+}
+
+#map .cluster {
+  border: 1px solid blue;
+  width: 30px;
+  height: 30px;
+  margin-top: -15px;
+  margin-left: -15px;
+}
