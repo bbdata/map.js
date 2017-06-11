@@ -17,8 +17,18 @@
       maps.maps = maps.maps || [];
   
   maps.cmd.push(function() {
-    maps.maps['#map'] = new maps.Map({
-      element: document.getElementById('map'),
+    var elementId = 'map';
+    
+    maps.maps[elementId] = new maps.Map({
+      elementID: elementId,
+      paths: {
+        styles: 'map_styles.json', // Created with https://mapstyle.withgoogle.com
+        pins: 'map_pins.json',
+      },
+      mapOptions: {
+        //center: {lat: 49.282263, lng: -123.042992},
+        //zoom: 14,
+      }
     });
   });
 </script>

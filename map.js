@@ -3,56 +3,64 @@
 
   // Map Constructor.
   function Map(config, cb) {
-    this.config = Map.merge(Map.defaults, config);
+    this.config = Map.merge({}, Map.defaults, config);
     
-    this.element_ = this.config.element;
+    this.element_ = document.getElementById(this.config.elementID);
     this.map_ = null;
     this.data_ = [];
     this.pins_ = [];
     this.clusters_ = [];
+    this.gridSize_ = this.config.clusterOptions.gridSize;
+    this.bounds_ = [];
     
     this.init();
   }
   
   // Default Map config.
   Map.defaults = {
+    //elementID: null,
     paths: {
-      styles: 'map_styles.json',
-      pins: 'map_pins.json',
+      //styles: null,
+      //pins: null,
     },
     mapOptions: {
-      center: {lat: 49.282263, lng: -123.042992},
-      zoom: 14,
-      styles: null, // https://mapstyle.withgoogle.com
+      //center: null,
+      //zoom: null,
       fullscreenControl: false,
       gestureHandling: 'auto',
       mapTypeControl: false,
       streetViewControl: false,
       zoomControl: true,
       backgroundColor: '#c9f1f5',
-    }
+    },
+    clusterOptions: {
+      gridSize: 60,
+    },
+    pinOptions: {
+    },
   };
   
   // Utility to merge config arrays together.
-  Map.merge = function() {
-    var args = Array.prototype.slice.call(arguments);
+  Map.merge = function(out) {
+    out = out || {};
 
-    function merge(target, obj) {
-      if (typeof target === 'object' && typeof obj === 'object') {
-        for (var key in obj) {
-          if (obj.hasOwnProperty(key)) {
-            target[key] = obj[key];
-          }
+    for (var i = 1; i < arguments.length; i++) {
+      var obj = arguments[i];
+
+      if (!obj)
+        continue;
+  
+      for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          if (typeof obj[key] === 'object')
+            out[key] = Map.merge(out[key], obj[key]);
+          else
+            out[key] = obj[key];
         }
       }
-
-      return target;
     }
-
-    for (var i = 1, end = args.length; i < end; i++) {
-      merge(args[0], args[i]);
-    }
-    return args[0];
+  
+    return out;
   };
   
   // Utlity function to extend an object's prototype
@@ -90,10 +98,18 @@
         mapOptions = this.config.mapOptions;
     
     this.map_ = new google.maps.Map(element, mapOptions);
+    
+    if (!mapOptions.center && !mapOptions.zoom) {
+      var that = this;
+      google.maps.event.addListenerOnce(this.map_, 'idle', function(){
+        that.fitBounds();
+      });
+    }
   }
   
   Map.prototype.createPins_ = function(pinToMap) {
     var data = this.data_;
+    var bounds = new google.maps.LatLngBounds();
     
     if (data.length) {
       for (var i = 0, datum; datum = data[i]; i++) {
@@ -104,8 +120,11 @@
         }
         
         this.pins_.push(pin);
+        bounds.extend(pin.lnglat_);
       }
     }
+    
+    this.bounds_ = bounds;
   }
   
   Map.prototype.createClusters_ = function() {
@@ -115,7 +134,13 @@
     }
     
     var pins = this.pins_;
-    var clusters = new Clusters(pins, this.map_);
+    var clusters = new Clusters(pins, this.map_, {
+      gridSize: this.gridSize_,
+    });
+  }
+  
+  Map.prototype.fitBounds = function() {
+    this.map_.fitBounds(this.bounds_);
   }
   
   Map.getJson = function(url, callback) {
@@ -201,14 +226,14 @@ console.log('Pin got clicked.');
   
   window.maps.Pin = Pin;
   
-  function Clusters(pins, map) {
+  function Clusters(pins, map, config) {
     Map.extend(Clusters, google.maps.OverlayView);
     
     this.map_ = map;
     this.pins_ = pins;
     
     this.clusters_ = [];
-    this.gridSize_ = 30;
+    this.gridSize_ = config.gridSize;
     
     this.setMap(map);
   }
@@ -314,9 +339,17 @@ console.log('Pin got clicked.');
   
   // Implement google.maps.OverlayView().onAdd()
   Cluster.prototype.onAdd = function() {
+    var pins = this.pins_.length;
+    
     var cluster = document.createElement('div');
-    cluster.className = 'cluster';
+    cluster.className = 'pin';
+    
+    if (pins > 1) {
+      cluster.className += ' cluster';
+    }
+    
     cluster.style.position = 'absolute';
+    cluster.dataset.count = pins;
     
     if (this.tpl_) {
       cluster.innerHTML = this.tpl_;
