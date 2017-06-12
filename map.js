@@ -369,12 +369,13 @@
     
     this.div_ = null;
     this.tpl_ = null;
-    this.callbacks_ = {
-      'click': [],
-    };
     
     this.setMap(this.map_);
   }
+  
+  Cluster.prototype.callbacks_ = {
+    'click': [],
+  };
   
   // Implement google.maps.OverlayView().onAdd()
   Cluster.prototype.onAdd = function() {
