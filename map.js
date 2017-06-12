@@ -4,7 +4,7 @@
   // Map Constructor.
   function Map(config, cb) {
     this.config = Map.merge({}, Map.defaults, config);
-
+    this.adapters_ = this.config.adapters;
     this.element_ = document.getElementById(this.config.elementID);
     this.map_ = null;
     this.data_ = [];
@@ -91,6 +91,17 @@
         that.createClusters_();
       });
     });
+    
+    var adapters = this.adapters_;
+    for (var i = 0, adapter; adapter = adapters[i]; i++) {
+      var s = document.createElement('script'),
+          e = document.getElementsByTagName('script')[0];
+      
+      s.type = 'text/javascript';
+      s.async = true;
+      s.src = adapter;
+      e.parentNode.insertBefore(s, e);
+    }
   }
   
   Map.prototype.createMap_ = function() {
@@ -134,9 +145,12 @@
     }
     
     var pins = this.pins_;
-    var clusters = new Clusters(pins, this.map_, {
+    var map = this.map_;
+    var config = {
       gridSize: this.gridSize_,
-    });
+    }
+    
+    var clusters = new Clusters(pins, map, config);
   }
   
   Map.prototype.fitBounds = function() {
@@ -262,9 +276,11 @@
   
   // Implement google.maps.OverlayView().draw()
   Clusters.prototype.draw = function() {
+    var clusters = this.clusters_;
+    
     // Reset Clusters
-    if (this.clusters_.length) {
-      for (var i = 0, cluster; cluster = this.clusters_[i]; i++) {
+    if (clusters.length) {
+      for (var i = 0, cluster; cluster = clusters[i]; i++) {
         cluster.remove();
       }
       this.clusters_ = [];
@@ -279,11 +295,12 @@
   Clusters.prototype.onRemove = function() {}
   
   Clusters.prototype.addToClosestCluster_ = function(pin) {
+    var clusters = this.clusters_;
     var clusterToAddTo = null;
     
     // Find out if this pin belongs in an existing cluster.
-    if (this.clusters_.length) {
-      for (var i = 0, cluster; cluster = this.clusters_[i]; i++) {
+    if (clusters.length) {
+      for (var i = 0, cluster; cluster = clusters[i]; i++) {
         if (cluster.bounds_.contains(new google.maps.LatLng(pin.lnglat_))) {
           clusterToAddTo = cluster;
         }
@@ -296,7 +313,7 @@
     else {
       var cluster = new Cluster(this);
       cluster.addPin(pin);
-      this.clusters_.push(cluster);
+      clusters.push(cluster);
     }
   }
   
