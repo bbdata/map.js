@@ -4,7 +4,7 @@
   // Map Constructor.
   function Map(config, cb) {
     this.config = Map.merge({}, Map.defaults, config);
-    
+
     this.element_ = document.getElementById(this.config.elementID);
     this.map_ = null;
     this.data_ = [];
@@ -181,6 +181,9 @@
     
     this.div_ = null;
     this.tpl_ = null;
+    this.callbacks_ = {
+      'click': [],
+    };
   }
   
   Pin.prototype.pinToMap = function(map) {
@@ -204,7 +207,23 @@
     var that = this;
     
     google.maps.event.addDomListener(pin, 'click', function() {
-console.log('Pin got clicked.');
+      if (that.callbacks_['click'].length) {
+        var callbacks = that.callbacks_['click'];
+        
+        for (var i = 0; i < callbacks.length; i++) {
+          try {
+            if (typeof callbacks[i] === "function") {
+              callbacks[i](that);
+            }
+            else {
+              // What to do when given something not a function.
+            }
+          }
+          catch (e) {
+            // Error handling.
+          }
+        }
+      }
     });
   }
   
@@ -333,6 +352,9 @@ console.log('Pin got clicked.');
     
     this.div_ = null;
     this.tpl_ = null;
+    this.callbacks_ = {
+      'click': [],
+    };
     
     this.setMap(this.map_);
   }
@@ -362,7 +384,23 @@ console.log('Pin got clicked.');
     var that = this;
     
     google.maps.event.addDomListener(cluster, 'click', function() {
-console.log('Cluster got clicked.');
+      if (that.callbacks_['click'].length) {
+        var callbacks = that.callbacks_['click'];
+        
+        for (var i = 0; i < callbacks.length; i++) {
+          try {
+            if (typeof callbacks[i] === "function") {
+              callbacks[i](that);
+            }
+            else {
+              // What to do when given something not a function.
+            }
+          }
+          catch (e) {
+            // Error handling.
+          }
+        }
+      }
     });
   }
   
