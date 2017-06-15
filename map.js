@@ -502,7 +502,7 @@
     // Get Google Maps API library.
     gms.type = 'text/javascript';
     gms.async = true;
-    gms.src = 'http://maps.googleapis.com/maps/api/js?key=' + gmk + '&callback=' + cb;
+    gms.src = '//maps.googleapis.com/maps/api/js?key=' + gmk + '&callback=' + cb;
     gme.parentNode.insertBefore(gms, gme);
   }
 
