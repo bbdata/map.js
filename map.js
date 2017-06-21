@@ -444,11 +444,13 @@
     }
     else {
       // Average out the center between the cluster and the new pin.
-      var l = this.pins_.length;
-      var lat = (this.center_.lat * (l-1) + pin.lnglat_.lat) / l;
-      var lng = (this.center_.lng * (l-1) + pin.lnglat_.lng) / l;
+      // TODO: Rethink the centering of clusters. It should take place
+      // have been inserted. Otherwise we risk cluster collisions.
+      //var l = this.pins_.length;
+      //var lat = (this.center_.lat * (l-1) + pin.lnglat_.lat) / l;
+      //var lng = (this.center_.lng * (l-1) + pin.lnglat_.lng) / l;
       
-      this.center_ = {'lng': lng, 'lat': lat};
+      //this.center_ = {'lng': lng, 'lat': lat};
     }
     
     this.pins_.push(pin);
